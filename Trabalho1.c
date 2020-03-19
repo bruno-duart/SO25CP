@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 void main(void) {
@@ -26,9 +28,9 @@ void main(void) {
                     i++;
                     printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());//O
                 }
-            }wait();
+            }wait(NULL);
         }
     }
-    wait();
+    wait(NULL);
     printf("proc-%c, pid %d morreu\n", str[i], getpid());
 }
