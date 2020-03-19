@@ -1,30 +1,32 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int main(void) {
-    char str[100];
+void main(void) {
+    char str[5] = "BRUNO";
     int i = 0;
     __pid_t mypid;
 
-    scanf("%s", str);
-    printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());
-    if(fork() == 0){
+    printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());//B
+    mypid = fork();
+    if(mypid == 0){
         i++;
-        printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());
-
-        if(fork() == 0){
+        printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());//R
+        mypid = fork();
+        if(mypid == 0){
             i++;
-            printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());
-
-            if(fork() == 0){
-                i++;
-                printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());
-            }
+            printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());//U
         }
-        wait();
-        if(fork() == 0){
-            i++;
-            printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());
+        else if(mypid > 0){
+            mypid = fork();
+            if(mypid == 0){
+                i += 2;
+                printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());//N
+                mypid = fork();
+                if(mypid == 0){
+                    i++;
+                    printf("proc-%c, pid %d, ppid %d, acaba de ser criado\n", str[i], getpid(), getppid());//O
+                }
+            }wait();
         }
     }
     wait();
