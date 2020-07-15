@@ -1,65 +1,86 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <pthread.h>
+#include <unistd.h>
+#include <time.h>
 
-double NUM_TERMOS = 1000; //Define o número mínimo de termos a ser calculado
+#define NUM_TERMOS 1e9  //Define o número mínimo de termos a ser calculado
+#define NUM_THREADS 16   //Define o número de threads
+#define NUM_TER_THR NUM_TERMOS/NUM_THREADS  //Define o número de Termos Por Thread
+double result_piLGM[NUM_THREADS], result_piNila[NUM_THREADS]; //Arrays para resultados parciais
 
 /*  Séries para aproximação de PI
- *  Euler: 
- *   pi = 2 * (1 + (1/3) + ((1*2)/(3*5)) + ((1*2*3)/(3*5*7)) )
- *   pi = 2 * (1 + sum(n! / (produtorio(2m + 1))))
- *                               m: 1 ~ n
- *                     n: 1 ~ infinity
- *
  *  Nilakantha:
  *   pi = 4 * [(3/4) + (1/(2*3*4)) - (1/(4*5*6)) + (1/(6*7*8)) ]
  *   pi = 4 * [(3/4) + sum( [(-1)^(n+1)] * [1/((2*n)*(2*n + 1)*(2 * n + 2))] ) ]
- *  **/
-
-//Declaração dos Arrays
-double resultEuler;
-
-
+ *  
+ *  Leibniz-Gregory-Madhava
+ *   pi = 4 * (1 - 1/3 + 1/5 - 1/7 + 1/)
+ * **/
 
 // Funções para o cálculo dos termos
-
-//Cálculo do fatorial
-double fatorial(double n){
-    double fat = 1;
-    
-    for(double i = n; i > 0; i--){
-        fat *= i;
-    }
-
-    return fat;
+double termoLGM(double n){
+    return pow(-1, n) * 1/(2*n + 1);
 }
-//Cálculo de cada termo
-double termoEuler(double n){
-    double produt = 1;
 
-    for(double i = 1; i <= n; i++){
-        produt *= 2*i + 1;
-    }
-
-    return (fatorial(n) / produt);
+double termoNila(double n){
+    if((int)n % 2 != 0)
+        return (double)(1/(2*n)) * (1/(2*n + 1)) * (1/(2*n + 2));
+    return (double)(-1/(2*n)) * (1/(2*n + 1)) * (1/(2*n + 2));
 }
-/*Soma dos resultados parciais
-double somaEuler(){
-    double resultado = 1;
 
-    for(int i = 0; i < NUM_TERMOS; i++){
-        resultado += resultEuler[i];
+void *LGM(void *threadID){
+    long tid = (long)threadID;
+    for(long i = tid*NUM_TER_THR; i < tid*NUM_TER_THR + NUM_TER_THR; i++)
+        result_piLGM[tid] += termoLGM((double)i);
+    pthread_exit(NULL);
+}
+
+void *Nila(void *threadID){
+    long tid = (long)threadID;
+    for(long i = tid*NUM_TER_THR; i < tid*NUM_TER_THR + NUM_TER_THR; i++)
+        result_piNila[tid] += termoNila((double)i+1);
+    pthread_exit(NULL);
+}
+
+void main(void){
+    pthread_t threadLGM[NUM_THREADS], threadNila[NUM_THREADS];
+    long i, status;
+    double resultLGM = 0, resultNila = 0; 
+    clock_t tempoLGM, tempoNila; 
+
+    //Executando as threads da Série Leibniz-Gregory-Madhava
+    tempoLGM = clock();
+    for(i = 0; i < NUM_THREADS; i++){
+        status = pthread_create(&threadLGM[i], NULL, LGM, (void*)i);
+        if(status) {
+            perror("pthread_create");
+            exit(1);
+        }
+        pthread_join(threadLGM[i], NULL);
     }
-    return 2.0*resultado;
-}*/
-int main(){
-    resultEuler = 1;
-    
-    for(int i = 0; i < NUM_TERMOS; i++){
-        resultEuler += termoEuler((double)i+1);
+    tempoLGM = clock() - tempoLGM;
+
+    //Executando as threads da Série Nilakantha
+    tempoNila = clock();
+    for(i = 0; i < NUM_THREADS; i++){
+        status = pthread_create(&threadNila[i], NULL, Nila, (void*)i);
+        if(status) {
+            perror("pthread_create");
+            exit(1);
+        }
+        pthread_join(threadNila[i], NULL);
     }
-    
-    printf("Aproximação de Euler para pi com %lf termos: %f\n", NUM_TERMOS, 2*resultEuler);
-    //free(resultEuler);
-    return 0;
+    tempoNila = clock() - tempoNila;
+
+    //O tempo de realizar as somas não é contabilizado, pois em tese é igual para ambas(? conferir)
+    for(i = 0; i < NUM_THREADS; i++){
+        resultLGM += result_piLGM[i];
+        resultNila += result_piNila[i];
+    }
+    printf("Número de Threads: %d\n", NUM_THREADS);
+    printf("Leibniz-Gregory-Madhava (%.0lf termos) \tTempo: %.5f s '\t%.50f\n", NUM_TERMOS, (double)tempoLGM/CLOCKS_PER_SEC, 4*resultLGM);
+    printf("Nilakantha (%.0lf termos) \tTempo: %.5f s \t%.50f\n", NUM_TERMOS, (double)tempoNila/CLOCKS_PER_SEC, 4*resultNila + 3);
+    pthread_exit(NULL);
 }
