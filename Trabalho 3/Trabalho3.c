@@ -6,7 +6,7 @@
 #include <time.h>
 
 #define NUM_TERMOS 1e9  //Define o número mínimo de termos a ser calculado
-#define NUM_THREADS 16   //Define o número de threads
+#define NUM_THREADS 1   //Define o número de threads
 #define NUM_TER_THR NUM_TERMOS/NUM_THREADS  //Define o número de Termos Por Thread
 double result_piLGM[NUM_THREADS], result_piNila[NUM_THREADS]; //Arrays para resultados parciais
 
@@ -45,7 +45,7 @@ void *Nila(void *threadID){
 }
 
 void main(void){
-    pthread_t threadLGM[NUM_THREADS], threadNila[NUM_THREADS];
+    pthread_t thread[NUM_THREADS];//, threadNila[NUM_THREADS];
     long i, status;
     double resultLGM = 0, resultNila = 0; 
     clock_t tempoLGM, tempoNila; 
@@ -53,24 +53,24 @@ void main(void){
     //Executando as threads da Série Leibniz-Gregory-Madhava
     tempoLGM = clock();
     for(i = 0; i < NUM_THREADS; i++){
-        status = pthread_create(&threadLGM[i], NULL, LGM, (void*)i);
+        status = pthread_create(&thread[i], NULL, LGM, (void*)i);
         if(status) {
             perror("pthread_create");
             exit(1);
         }
-        pthread_join(threadLGM[i], NULL);
+        pthread_join(thread[i], NULL);
     }
     tempoLGM = clock() - tempoLGM;
 
     //Executando as threads da Série Nilakantha
     tempoNila = clock();
     for(i = 0; i < NUM_THREADS; i++){
-        status = pthread_create(&threadNila[i], NULL, Nila, (void*)i);
+        status = pthread_create(&thread[i], NULL, Nila, (void*)i);
         if(status) {
             perror("pthread_create");
             exit(1);
         }
-        pthread_join(threadNila[i], NULL);
+        pthread_join(thread[i], NULL);
     }
     tempoNila = clock() - tempoNila;
 
@@ -79,8 +79,8 @@ void main(void){
         resultLGM += result_piLGM[i];
         resultNila += result_piNila[i];
     }
-    printf("Número de Threads: %d\n", NUM_THREADS);
-    printf("Leibniz-Gregory-Madhava (%.0lf termos) \tTempo: %.5f s '\t%.50f\n", NUM_TERMOS, (double)tempoLGM/CLOCKS_PER_SEC, 4*resultLGM);
-    printf("Nilakantha (%.0lf termos) \tTempo: %.5f s \t%.50f\n", NUM_TERMOS, (double)tempoNila/CLOCKS_PER_SEC, 4*resultNila + 3);
+    printf("Threads: %d\t(%.0lf termos)\n", NUM_THREADS, NUM_TERMOS);
+    printf("LGM \tTempo: %.5f s \t%.50f\n", (double)tempoLGM/CLOCKS_PER_SEC, 4*resultLGM);
+    printf("NIL \tTempo: %.5f s \t%.50f\n", (double)tempoNila/CLOCKS_PER_SEC, 4*resultNila + 3);
     pthread_exit(NULL);
 }
