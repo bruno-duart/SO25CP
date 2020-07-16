@@ -13,12 +13,13 @@ void sigtstp_handler(){
 void sigalrm_handler(){
     if(ans != 'n')
         kill(getpid(), SIGKILL);
+    ans = ' ';
 }
 int main(){
     signal(SIGINT, sigint_handler);
     signal(SIGTSTP, sigtstp_handler);
     signal(SIGALRM, sigalrm_handler);
-    ans = 'n';
+    ans = ' ';
     count = 0;
 
     while(1){
