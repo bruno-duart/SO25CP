@@ -3,7 +3,7 @@
 #include <math.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <time.h>
+//#include <time.h>
 
 #define NUM_TERMOS 1e9  //Define o número mínimo de termos a ser calculado
 #define NUM_THREADS 16   //Define o número de threads
@@ -28,8 +28,8 @@ double termoLGM(double n){
 
 double termoNila(double n){
     if((int)n % 2 != 0)
-        return (double)(1/(2*n)) * (1/(2*n + 1)) * (1/(2*n + 2));
-    return (double)(-1/(2*n)) * (1/(2*n + 1)) * (1/(2*n + 2));
+        return (double)1/(2*n * (2*n + 1) * (2*n + 2));
+    return (double)-1/(2*n * (2*n + 1) * (2*n + 2));
 }
 
 void *LGM(void *threadID){
@@ -49,40 +49,46 @@ void *Nila(void *threadID){
 void main(void){
     pthread_t thread[NUM_THREADS];//, threadNila[NUM_THREADS];
     long i, status;
-    double resultLGM = 0, resultNila = 0; 
-    clock_t tempoLGM, tempoNila; 
+    double resultLGM = 0, resultNila = 0.75; 
+    //clock_t tempoLGM, tempoNila; 
 
+    for(int l = 0; l < NUM_THREADS; l++){
+        result_piNila[NUM_THREADS] = 0;
+        result_piLGM[NUM_THREADS] = 0;
+    }
+    
+    printf("Threads: %d\t(%.0lf termos)\n", NUM_THREADS, NUM_TERMOS);
+    
     //Executando as threads da Série Leibniz-Gregory-Madhava
-    tempoLGM = clock();
     for(i = 0; i < NUM_THREADS; i++){
         status = pthread_create(&thread[i], NULL, LGM, (void*)i);
         if(status) {
             perror("pthread_create");
             exit(1);
         }
-        pthread_join(thread[i], NULL);
+        
     }
-    tempoLGM = clock() - tempoLGM;
-
-    //Executando as threads da Série Nilakantha
-    tempoNila = clock();
     for(i = 0; i < NUM_THREADS; i++){
+        pthread_join(thread[i], NULL);
+        resultLGM += result_piLGM[i];
+    }
+    printf("LGM \tTempo: 500 s \t%.15f\n", 4*resultLGM);
+    
+    
+    //Executando as threads da Série Nilakantha
+    /*for(i = 0; i < NUM_THREADS; i++){
         status = pthread_create(&thread[i], NULL, Nila, (void*)i);
         if(status) {
             perror("pthread_create");
             exit(1);
         }
-        pthread_join(thread[i], NULL);
     }
-    tempoNila = clock() - tempoNila;
-
-    //O tempo de realizar as somas não é contabilizado, pois em tese é igual para ambas(? conferir)
     for(i = 0; i < NUM_THREADS; i++){
-        resultLGM += result_piLGM[i];
+        pthread_join(thread[i], NULL);
         resultNila += result_piNila[i];
     }
-    printf("Threads: %d\t(%.0lf termos)\n", NUM_THREADS, NUM_TERMOS);
-    printf("LGM \tTempo: %.50f s \t%.50f\n", (double)tempoLGM/CLOCKS_PER_SEC, 4*resultLGM);
-    printf("NIL \tTempo: %.50f s \t%.50f\n", (double)tempoNila/CLOCKS_PER_SEC, 4*resultNila + 3);
+    printf("NIL \tTempo: 500 s \t%.15f\n", 4*resultNila); */
+
     pthread_exit(NULL);
 }
+//\tTempo: %.5f s  (double)tempoNila/CLOCKS_PER_SEC,

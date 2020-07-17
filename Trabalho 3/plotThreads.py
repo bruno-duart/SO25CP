@@ -21,10 +21,12 @@ for line in data:
 timeLGM = np.array(timeLGM)
 timeNila = np.array(timeNila)
 
-plt.plot(arrThreads, timeLGM, label="Leibniz")#
-plt.plot(arrThreads, timeNila, label="Nila")
-plt.title('Relation between number of threads and running time')
-plt.ylabel('Time (s)')
-plt.xlabel('Number of Threads')
+plt.plot(arrThreads, timeLGM, label="L. G. M.")
+plt.plot(arrThreads, timeNila, label="Nilakantha")
+plt.title("Relação entre o número de threads e o tempo \n "
+          "necessário para calcular pi através de séries iterativas")
+plt.ylabel('Tempo (s)')
+plt.xlabel('Númer de Threads')
+plt.grid()
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 plt.show()
