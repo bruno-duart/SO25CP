@@ -6,9 +6,11 @@
 #include <time.h>
 
 #define NUM_TERMOS 1e9  //Define o número mínimo de termos a ser calculado
-#define NUM_THREADS 1   //Define o número de threads
+#define NUM_THREADS 16   //Define o número de threads
 #define NUM_TER_THR NUM_TERMOS/NUM_THREADS  //Define o número de Termos Por Thread
 double result_piLGM[NUM_THREADS], result_piNila[NUM_THREADS]; //Arrays para resultados parciais
+
+// gcc Trabalho3.c -o Trabalho3 -lm -lpthread && ./Trabalho3 >> ResultadosMeuPc.txt
 
 /*  Séries para aproximação de PI
  *  Nilakantha:
@@ -80,7 +82,7 @@ void main(void){
         resultNila += result_piNila[i];
     }
     printf("Threads: %d\t(%.0lf termos)\n", NUM_THREADS, NUM_TERMOS);
-    printf("LGM \tTempo: %.5f s \t%.50f\n", (double)tempoLGM/CLOCKS_PER_SEC, 4*resultLGM);
-    printf("NIL \tTempo: %.5f s \t%.50f\n", (double)tempoNila/CLOCKS_PER_SEC, 4*resultNila + 3);
+    printf("LGM \tTempo: %.50f s \t%.50f\n", (double)tempoLGM/CLOCKS_PER_SEC, 4*resultLGM);
+    printf("NIL \tTempo: %.50f s \t%.50f\n", (double)tempoNila/CLOCKS_PER_SEC, 4*resultNila + 3);
     pthread_exit(NULL);
 }
