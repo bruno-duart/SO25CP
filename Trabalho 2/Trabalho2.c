@@ -1,3 +1,12 @@
+/*
+ ****************************************************
+ *         Sistemas Operacionais - 2020/1           *
+ *              Trabalho 2 - SYSCALLS               *
+ *              Bruno Duarte  1917323               *
+ *          brunoduarte@alunos.utfpr.edu.br         *
+ ****************************************************
+*/
+
 #include <stdio.h>
 #include <signal.h>
 #include <unistd.h>
@@ -24,12 +33,12 @@ int main(){
 
     while(1){
         if(flag){
-            printf("Number of SIGINTS: %d\n", count);
+            printf("\nNumber of SIGINTS: %d\n", count);
             flag = 0;
         }
         if(count == 10){
             printf("\n");
-            printf("Do you want to exit (Y/n)? ");
+            printf("Do you really want to exit (Y/n)? ");
             alarm(5);
             scanf(" %c", &ans);
             if(ans == 'Y'){
