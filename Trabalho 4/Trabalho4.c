@@ -58,5 +58,8 @@ int main(){
     pthread_create(&threads[3], NULL, semD, NULL);
     pthread_create(&threads[4], NULL, semE, NULL);
 
+    for(int i = 0; i < NUM_THREADS; i++)
+        pthread_join(threads[i], NULL);
+
     pthread_exit(NULL);  
 }
