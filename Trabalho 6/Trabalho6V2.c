@@ -11,13 +11,6 @@
 int numJavalis = MAX_NUM_JAVALIS;
 char nome[NUM_GAULESES] = "BRUNO";
 sem_t sem_Coz, sem_Retira, sem_Gau, sem_Lib;
-/*
-void Gaules(){
-    while(1){
-        j = RetiraJavali();
-        ComeJavali(j);
-    }
-}*/
 
 void RetiraJavali(long gaules){
     sem_wait(&sem_Gau);
