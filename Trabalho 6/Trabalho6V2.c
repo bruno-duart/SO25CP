@@ -10,7 +10,7 @@
 
 int numJavalis = MAX_NUM_JAVALIS;
 char nome[NUM_GAULESES] = "BRUNO";
-sem_t sem_Coz, sem_Retira, sem_Gau[NUM_GAULESES], sem_Lib[NUM_GAULESES];
+sem_t sem_Coz, sem_Retira, sem_Gau, sem_Lib;
 /*
 void Gaules(){
     while(1){
@@ -20,24 +20,24 @@ void Gaules(){
 }*/
 
 void RetiraJavali(long gaules){
-    sem_wait(&sem_Gau[gaules]);
+    sem_wait(&sem_Gau);
     if(!numJavalis){
-        printf("Gaulês %c(%ld) acordou o cozinheiro\n", nome[gaules], gaules);
         sem_post(&sem_Coz);
-       // sem_wait(&sem_Retira);
+        printf("Gaulês %c(%ld) acordou o cozinheiro\n", nome[gaules], gaules);
+        sem_wait(&sem_Retira);
     }
     if(numJavalis){
         numJavalis--;
     }
-    sem_post(&sem_Lib[gaules]);
+    sem_post(&sem_Lib);
 }
 
 void *Gaules(void *threadid){
     long gaules = (long)threadid;
     while(1){
-        sem_post(&sem_Gau[gaules]);
+        sem_post(&sem_Gau);
         RetiraJavali(gaules);
-        sem_wait(&sem_Lib[gaules]);
+        sem_wait(&sem_Lib);
         printf("Gaulês %c(%ld) comendo. Restam %d Javalis\n", nome[gaules], gaules, numJavalis);
         sleep(rand() % 4 + 1);
     }
@@ -48,7 +48,7 @@ void *Cozinheiro(){
     while(1){
         sem_wait(&sem_Coz);
         numJavalis = MAX_NUM_JAVALIS;
-        //sem_post(&sem_Retira);
+        sem_post(&sem_Retira);
     }
     pthread_exit(NULL);
 }
@@ -56,13 +56,12 @@ void *Cozinheiro(){
 void main(){
     srand(time(NULL));
     sem_init(&sem_Coz, 0, 0);
-    //sem_init(&sem_Retira, 0, 0);
+    sem_init(&sem_Retira, 0, 0);
     pthread_t thread[6];
     long i;
-    for(i = 0; i < 5; i++){
-        sem_init(&sem_Gau[i], 0, 1);
-        sem_init(&sem_Lib[i], 0, 0);
-    }
+    sem_init(&sem_Gau, 0, 1);
+    sem_init(&sem_Lib, 0, 0);
+    
     
     for(i = 0; i < 5; i++)
         pthread_create(&thread[i], NULL, Gaules, (void*)i);
