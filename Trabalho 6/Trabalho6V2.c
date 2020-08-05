@@ -1,3 +1,13 @@
+/*
+ ****************************************************
+ *         Sistemas Operacionais - 2020/1           *
+ *             Trabalho 6 - Jantar dos              *
+ *                     Gauleses                     *
+ *              Bruno Duarte  1917323               *
+ *          brunoduarte@alunos.utfpr.edu.br         *
+ ****************************************************
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
@@ -6,7 +16,6 @@
 
 #define MAX_NUM_JAVALIS 19
 #define NUM_GAULESES 5
-#define numBreak 15
 
 int numJavalis = MAX_NUM_JAVALIS;
 char nome[NUM_GAULESES] = "BRUNO";
@@ -40,6 +49,7 @@ void *Gaules(void *threadid){
 void *Cozinheiro(){
     while(1){
         sem_wait(&sem_Coz);
+        printf("Cozinheiro reabasteceu os javalis e foi nanar\n");
         numJavalis = MAX_NUM_JAVALIS;
         sem_post(&sem_Retira);
     }

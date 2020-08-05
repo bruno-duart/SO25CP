@@ -1,12 +1,20 @@
+/*
+ ****************************************************
+ *         Sistemas Operacionais - 2020/1           *
+ *              Trabalho 3 - Threads                *
+ *              Bruno Duarte  1917323               *
+ *          brunoduarte@alunos.utfpr.edu.br         *
+ ****************************************************
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <pthread.h>
 #include <unistd.h>
-//#include <time.h>
 
 #define NUM_TERMOS 1e9  //Define o número mínimo de termos a ser calculado
-#define NUM_THREADS 16   //Define o número de threads
+#define NUM_THREADS 16   //Define o número de threads (deve ser alterado antes de cada execução)
 #define NUM_TER_THR NUM_TERMOS/NUM_THREADS  //Define o número de Termos Por Thread
 double result_piLGM[NUM_THREADS], result_piNila[NUM_THREADS]; //Arrays para resultados parciais
 
@@ -20,6 +28,11 @@ double result_piLGM[NUM_THREADS], result_piNila[NUM_THREADS]; //Arrays para resu
  *  Leibniz-Gregory-Madhava
  *   pi = 4 * (1 - 1/3 + 1/5 - 1/7 + 1/)
  * **/
+
+/* Para execução e correto cálculo do tempo, é necessário alterar manualmente (em código)
+ * a série a ser utilizada, bem como o número de threads. A alteração da série é realizada
+ * comentando e descomentando os trechos de códigos marcados na função main.
+ */
 
 // Funções para o cálculo dos termos
 double termoLGM(double n){
@@ -60,6 +73,7 @@ void main(void){
     printf("Threads: %d\t(%.0lf termos)\n", NUM_THREADS, NUM_TERMOS);
     
     //Executando as threads da Série Leibniz-Gregory-Madhava
+    /*
     for(i = 0; i < NUM_THREADS; i++){
         status = pthread_create(&thread[i], NULL, LGM, (void*)i);
         if(status) {
@@ -72,11 +86,11 @@ void main(void){
         pthread_join(thread[i], NULL);
         resultLGM += result_piLGM[i];
     }
-    printf("LGM \tTempo: 500 s \t%.15f\n", 4*resultLGM);
-    
+    printf("LGM \tTempo:  s \t%.15f\n", 4*resultLGM); //Saída com espaço para tempo para organização futura
+    */
     
     //Executando as threads da Série Nilakantha
-    /*for(i = 0; i < NUM_THREADS; i++){
+    for(i = 0; i < NUM_THREADS; i++){
         status = pthread_create(&thread[i], NULL, Nila, (void*)i);
         if(status) {
             perror("pthread_create");
@@ -87,7 +101,7 @@ void main(void){
         pthread_join(thread[i], NULL);
         resultNila += result_piNila[i];
     }
-    printf("NIL \tTempo: 500 s \t%.15f\n", 4*resultNila); */
+    printf("NIL \tTempo:  s \t%.15f\n", 4*resultNila); 
 
     pthread_exit(NULL);
 }

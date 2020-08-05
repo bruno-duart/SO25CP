@@ -1,3 +1,12 @@
+/*
+ ****************************************************
+ *         Sistemas Operacionais - 2020/1           *
+ *             Trabalho  4 - Semáforos              *
+ *              Bruno Duarte  1917323               *
+ *          brunoduarte@alunos.utfpr.edu.br         *
+ ****************************************************
+*/
+
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>

@@ -9,35 +9,50 @@
 
 #define MAX_NUM_JAVALIS 19
 #define NUM_GAULESES 5
-#define SHM_ID "/shm_open"
 
-typedef struct _pipe_t{
+typedef struct _pipe1_t{
     int numJavalis;
-    sem_t sem_Coz, sem_Retira, sem_Lib, sem_Gau;
-}pipe_t;
+}pipe1_t;
+
+typedef struct _pipe2_t{
+    char comando;
+}pipe2_t;
+
+pipe1_t *jav;
+
+sem_t sem_Retira, sem_Gau;
+
 char nome[5] = "BRUNO";
+
+void ini_controle(){
+    sem_init(&sem_Retira, 0, 0);
+    sem_init(&sem_Gau, 0, 0);
+}
 
 
 void RetiraJavali(long gaules){
-    sem_wait(&controle->sem_Gau);
-    if(!controle->numJavalis){
-        sem_post(&controle->sem_Coz);
+    sem_wait(&sem_Retira);
+    if(!jav->numJavalis){
         printf("Gaulês %c(%ld) acordou o cozinheiro\n", nome[gaules], gaules);
-        sem_wait(&controle->sem_Retira);
+        cont->comando = 'E';
+        //write(); //Solicita encher
+        //read(); //Lê que encheu
     }
-    if(controle->numJavalis){
-        controle->numJavalis--;
+    if(jav->numJavalis){
+        cont->comando = 'B';
+        //write(); //Solicita retirar
+        //read(); //Recebe um javali
     }
-    sem_post(&controle->sem_Lib);
+    sem_post(&sem_Gau);
 }
 
 void *Gaules(void *threadid){
     long gaules = (long)threadid;
     while(1){
-        sem_post(&controle->sem_Gau);
+        sem_post(&sem_Retira);
         RetiraJavali(gaules);
-        sem_wait(&controle->sem_Lib);
-        printf("Gaulês %c(%ld) comendo. Restam %d Javalis\n", nome[gaules], gaules, controle->numJavalis);
+        sem_wait(&sem_Gau);
+        printf("Gaulês %c(%ld) comendo. Restam %d Javalis\n", nome[gaules], gaules, jav->numJavalis);
         sleep(rand() % 4 + 1);
     }
     pthread_exit(NULL);
@@ -53,5 +68,3 @@ int main(){
     }
     pthread_exit(NULL);
 }
-// gcc Gaules.c -o Gaules -lpthread -lrt 
-// ./Gaules

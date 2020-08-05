@@ -1,3 +1,12 @@
+/*
+ ****************************************************
+ *         Sistemas Operacionais - 2020/1           *
+ *             Trabalho  5 - Semáforos              *
+ *              Bruno Duarte  1917323               *
+ *          brunoduarte@alunos.utfpr.edu.br         *
+ ****************************************************
+*/
+
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -8,6 +17,8 @@
 #define NUM_SEMAPHORES 9
 sem_t s[NUM_SEMAPHORES];
 int x, y, z, h, j, u;
+
+//Descrição de quais semáforos liberam uns aos outros
 /* s[0] -> procA
  * procA -> s[1] -> procB -> procC 
  * procA -> s[2] -> procG
