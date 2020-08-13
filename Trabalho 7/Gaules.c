@@ -1,3 +1,13 @@
+/*
+ ****************************************************
+ *         Sistemas Operacionais - 2020/1           *
+ *             Trabalho 7 - Jantar dos              *
+ *                  Gauleses (SHM)                  *
+ *              Bruno Duarte  1917323               *
+ *          brunoduarte@alunos.utfpr.edu.br         *
+ ****************************************************
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

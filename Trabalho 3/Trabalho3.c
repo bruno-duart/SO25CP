@@ -101,8 +101,7 @@ void main(void){
         pthread_join(thread[i], NULL);
         resultNila += result_piNila[i];
     }
-    printf("NIL \tTempo:  s \t%.15f\n", 4*resultNila); 
+    printf("NIL \tTempo:  s \t%.25f\n", 4*resultNila); 
 
     pthread_exit(NULL);
 }
-//\tTempo: %.5f s  (double)tempoNila/CLOCKS_PER_SEC,
