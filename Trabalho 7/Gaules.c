@@ -23,7 +23,7 @@
 
 typedef struct _shm_t{
     int numJavalis;
-    sem_t sem_Coz, sem_Retira, sem_Lib, sem_Gau;
+    sem_t sem_Coz, sem_Retira, sem_Lib, sem_Gau, sem_mesa;
 }shm_t;
 char nome[5] = "BRUNO";
 
@@ -53,10 +53,12 @@ void RetiraJavali(long gaules){
 void *Gaules(void *threadid){
     long gaules = (long)threadid;
     while(1){
+	sem_wait(&controle->sem_mesa);
         sem_post(&controle->sem_Gau);
         RetiraJavali(gaules);
         sem_wait(&controle->sem_Lib);
         printf("Gaulês %c(%ld) comendo. Restam %d Javalis\n", nome[gaules], gaules, controle->numJavalis);
+        sem_post(&controle->sem_mesa);
         sleep(rand() % 4 + 1);
     }
     pthread_exit(NULL);

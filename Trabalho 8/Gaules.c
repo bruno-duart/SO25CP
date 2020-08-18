@@ -33,12 +33,13 @@ typedef struct _pipe2_t{
 pipe1_t jav;
 pipe2_t pedido;
 int fd[2];
-sem_t sem_Retira, sem_Gau;
+sem_t sem_Retira, sem_Gau, sem_Mesa;
 char nome[5] = "BRUNO";
 
 void ini_controle(){
     sem_init(&sem_Retira, 0, 0);
     sem_init(&sem_Gau, 0, 0);
+    sem_init(&sem_Mesa, 0, 1);
 }
 
 void RetiraJavali(long gaules){
@@ -60,18 +61,18 @@ void RetiraJavali(long gaules){
 void *Gaules(void *threadid){
     long gaules = (long)threadid;
     while(1){
+        sem_wait(&sem_Mesa);
         sem_post(&sem_Retira);
         RetiraJavali(gaules);
         sem_wait(&sem_Gau);
         printf("Gaulês %c(%ld) comendo. Restam %d Javalis\n", nome[gaules], gaules, jav.numJavalis - 1);
+        sem_post(&sem_Mesa);
         sleep(rand() % 3 + 1);
     }
     pthread_exit(NULL);
 }
 
 int main(){
-    /*jav = malloc(sizeof(pipe1_t));
-    pedido = malloc(sizeof(pipe2_t));*/
     srand(time(NULL));
     mkfifo("retirar", 0666);
     mkfifo("servir", 0666);

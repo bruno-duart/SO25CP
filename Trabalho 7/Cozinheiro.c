@@ -22,7 +22,7 @@
 
 typedef struct _shm_t{
     int numJavalis;
-    sem_t sem_Coz, sem_Retira, sem_Lib, sem_Gau;
+    sem_t sem_Coz, sem_Retira, sem_Lib, sem_Gau, sem_mesa;
 }shm_t;
 
 shm_t *controle;
@@ -31,7 +31,8 @@ void ini_controle(){
     sem_init(&controle->sem_Coz, 1, 0);
     sem_init(&controle->sem_Retira, 1, 0);
     sem_init(&controle->sem_Lib, 1, 0);
-    sem_init(&controle->sem_Gau, 1, 1);
+    sem_init(&controle->sem_Gau, 1, 0);
+    sem_init(&controle->sem_mesa, 1, 1);
 
     controle->numJavalis = MAX_NUM_JAVALIS;
     printf("Cozinheiro encheu o caldeirão com %d javalis e foi nanar\n", controle->numJavalis);

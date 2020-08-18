@@ -19,7 +19,7 @@
 
 int numJavalis = MAX_NUM_JAVALIS;
 char nome[NUM_GAULESES] = "BRUNO";
-sem_t sem_Coz, sem_Retira, sem_Gau, sem_Lib;
+sem_t sem_Coz, sem_Retira, sem_Gau, sem_Lib, sem_mesa;
 
 void RetiraJavali(long gaules){
     sem_wait(&sem_Gau);
@@ -37,10 +37,12 @@ void RetiraJavali(long gaules){
 void *Gaules(void *threadid){
     long gaules = (long)threadid;
     while(1){
+    	sem_wait(&sem_mesa);
         sem_post(&sem_Gau);
         RetiraJavali(gaules);
         sem_wait(&sem_Lib);
         printf("Gaulês %c(%ld) comendo. Restam %d Javalis\n", nome[gaules], gaules, numJavalis);
+        sem_post(&sem_mesa);
         sleep(rand() % 4 + 1);
     }
     pthread_exit(NULL);
@@ -60,11 +62,12 @@ void main(){
     srand(time(NULL));
     sem_init(&sem_Coz, 0, 0);
     sem_init(&sem_Retira, 0, 0);
+    sem_init(&sem_Gau, 0, 0);
+    sem_init(&sem_Lib, 0, 0);
+    sem_init(&sem_mesa, 0, 1);
+    
     pthread_t thread[6];
     long i;
-    sem_init(&sem_Gau, 0, 1);
-    sem_init(&sem_Lib, 0, 0);
-    
     
     for(i = 0; i < 5; i++)
         pthread_create(&thread[i], NULL, Gaules, (void*)i);
