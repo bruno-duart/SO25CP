@@ -19,12 +19,12 @@ int main(){
 
     pid = fork();
 	if(pid > 0){
-		system("gcc Cozinheiro2.c -o coz -lrt");
+		system("gcc Cozinheiro.c -o coz -lrt");
 		execl("./coz","", NULL);
 	} else if (pid == 0) {
 
 		sleep(1);
-		system("gcc Gaules2.c -o gau -lpthread -lrt ");
+		system("gcc Gaules.c -o gau -lpthread -lrt ");
 		execl("./gau","", NULL);
 	} else {
 		printf("Erro\n");

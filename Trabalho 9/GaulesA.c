@@ -27,12 +27,12 @@ typedef struct _msgbuff_t{
 
 msgbuff_t a, r;
 msgbuff_t *acorda = &a, *retira = &r;
-mqd_t fd1, fd2;
+mqd_t fd;
 int numJavalis;
 sem_t sem_Retira, sem_Gau, sem_Mesa;
 char nome[5] = "BRUNO";
 
-void ini_controle(){ //Inicialização dos semáforos
+void ini_controle(){
     sem_init(&sem_Retira, 0, 0);
     sem_init(&sem_Gau, 0, 0);
     sem_init(&sem_Mesa, 0, 1);
@@ -40,16 +40,17 @@ void ini_controle(){ //Inicialização dos semáforos
 
 void RetiraJavali(long gaules){
     sem_wait(&sem_Retira);
-    if(retira->controle == 0){ //Se o controle for 0, significa que todos os javalis foram consumidos
+    mq_receive(fd, (void*)retira, sizeof(msgbuff_t), 0);
+    if(retira->controle == 0){
         printf("Gaulês %c(%ld) acordou o cozinheiro\n", nome[gaules], gaules);
-         //Envia um sinal de controle
-        mq_send(fd1, (void*)acorda, sizeof(msgbuff_t), 0); //Solicita encher
-        printf("Mandei um recadinho\n");
-		mq_receive(fd2, (void*)retira, sizeof(msgbuff_t), 0); //Lê que encheu e permite a retirada de um javali
+        acorda->controle = 1;
+        mq_send(fd, (void*)acorda, sizeof(msgbuff_t), 0); //Solicita encher
+		mq_receive(fd, (void*)retira, sizeof(msgbuff_t), 0); //Lê que encheu
+        numJavalis = MAX_NUM_JAVALIS;
     }
-    if(retira->controle){
-        retira->controle--; //Retira um javali
-    }
+    /*if(retira.controle == 'J'){
+        write(fd[0], &pedido, sizeof(pipe2_t)); //Solicita retirar
+    }*/
     sem_post(&sem_Gau);
 }
 
@@ -60,7 +61,7 @@ void *Gaules(void *threadid){
         sem_post(&sem_Retira);
         RetiraJavali(gaules);
         sem_wait(&sem_Gau);
-        printf("Gaulês %c(%ld) comendo. Restam %d Javalis\n", nome[gaules], gaules, retira->controle);
+        printf("Gaulês %c(%ld) comendo. Restam %d Javalis\n", nome[gaules], gaules, --numJavalis);
         sem_post(&sem_Mesa);
         sleep(rand() % 3 + 1);
     }
@@ -70,20 +71,16 @@ void *Gaules(void *threadid){
 int main(){
     srand(time(NULL));
     struct mq_attr attr;
-    attr.mq_maxmsg = 1;
+    attr.mq_maxmsg = MAX_NUM_JAVALIS + 1;
 	attr.mq_msgsize = sizeof(msgbuff_t);
 	attr.mq_flags = 0;
     
-	mq_unlink("/acorda");
-	fd1 = mq_open("/acorda", O_RDWR|O_CREAT, 0666, &attr);
-	fd2 = mq_open("/retira", O_RDWR);
+	mq_unlink("/myqueue");
+	fd = mq_open("/myqueue", O_RDWR|O_CREAT, 0666, &attr);
 
     ini_controle();
     numJavalis = MAX_NUM_JAVALIS;
-    pthread_t gauleses[NUM_GAULESES];acorda->controle = 1;
-    printf("antes\n");
-    mq_receive(fd2, (void*)retira, sizeof(msgbuff_t), 0); //Lê do buffer
-    printf("depois\n");
+    pthread_t gauleses[NUM_GAULESES];
     for(long i = 0; i < NUM_GAULESES; i++)
         pthread_create(&gauleses[i], NULL, Gaules, (void*)i);
 
@@ -92,7 +89,7 @@ int main(){
     
     pthread_exit(NULL);
 }
-// gcc Gaules2.c -o Gaules -lpthread -lrt 
+// gcc Gaules.c -o Gaules -lpthread -lrt 
 // ./Gaules
 // /mnt/c/Users/bruno/OneDrive/'Área de Trabalho'/UTFPR/'7º Período'/SO25CP/Trabalhos/SO25CP/'Trabalho 8'
 // /media/brunoduarte/Acer/Users/bruno/OneDrive/'Área de Trabalho'/UTFPR/'7º Período'/SO25CP/Trabalhos/SO25CP/'Trabalho 8'

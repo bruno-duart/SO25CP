@@ -27,40 +27,40 @@ typedef struct _msgbuff_t{
 
 msgbuff_t a, r;
 msgbuff_t *acorda = &a, *retira = &r;
-mqd_t fd1, fd2;
+mqd_t fd;
 
 int main(){
     struct mq_attr attr;
 
-    attr.mq_maxmsg = 1;
+    attr.mq_maxmsg = MAX_NUM_JAVALIS + 1;
 	attr.mq_msgsize = sizeof(msgbuff_t);
 	attr.mq_flags = 0;
     
-    int cont = 0;
-	
-    mq_unlink("/retira");
-	fd2 = mq_open("/retira", O_RDWR|O_CREAT, 0666, &attr);
-    fd1 = mq_open("/acorda", O_RDWR);
+	mq_unlink("/myqueue");
+	fd = mq_open("/myqueue", O_RDWR|O_CREAT, 0666, &attr);
 
-    //Inicialização dos javalis
     printf("Cozinheiro encheu o caldeirão com %d javalis e foi nanar\n", MAX_NUM_JAVALIS);
-    retira->controle = MAX_NUM_JAVALIS;
-    printf("Antes 1\n");
-    mq_send(fd2, (void*)retira, sizeof(msgbuff_t), 0);
-    printf("Depois 1\n");
+    retira->controle = 1;
+    printf("RETIRA %d\n", retira->controle);
+    for(int i = 0; i < MAX_NUM_JAVALIS; i++)
+        mq_send(fd, (void*)retira, sizeof(msgbuff_t), 0);
+    retira->controle = 0;
+    mq_send(fd, (void*)retira, sizeof(msgbuff_t), 0);
 
     while(1){
-        printf("Antes\n");
-        mq_receive(fd1, (void*)acorda, sizeof(msgbuff_t), 0); //Lê do buffer
-        printf("Depois %d\n",cont++);
-        if(acorda->controle == 1){ //
+        mq_receive(fd, (void*)acorda, sizeof(msgbuff_t), 0);
+        if(acorda->controle == 1){
             printf("Cozinheiro encheu o caldeirão com %d javalis e foi nanar.\n", MAX_NUM_JAVALIS);
-            mq_send(fd2, (void*)retira, sizeof(msgbuff_t), 0);
-            acorda->controle = 0;
+            retira->controle = 1;
+            for(int i = 0; i < MAX_NUM_JAVALIS; i++)
+                mq_send(fd, (void*)retira, sizeof(msgbuff_t), 0);
+            retira->controle = 0;
+            mq_send(fd, (void*)retira, sizeof(msgbuff_t), 0);
         }
+        //write(fd[1], &jav, sizeof(pipe1_t));
     }
 }
-// gcc Cozinheiro2.c -o Cozinheiro -lpthread -lrt 
+// gcc Cozinheiro.c -o Cozinheiro -lpthread -lrt 
 // ./Cozinheiro
 // /mnt/c/Users/bruno/OneDrive/'Área de Trabalho'/UTFPR/'7º Período'/SO25CP/Trabalhos/SO25CP/'Trabalho 9'  
 // /media/brunoduarte/Acer/Users/bruno/OneDrive/'Área de Trabalho'/UTFPR/'7º Período'/SO25CP/Trabalhos/SO25CP/'Trabalho 9'
